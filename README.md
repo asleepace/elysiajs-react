@@ -6,11 +6,11 @@ This package provides a simple way to server side render your React application 
 const app = new Elysia()
   .use(
     reactPlugin({
-      publicPath: "public",
+      publicPath: 'public',
     })
   )
-  .get("/", () => <HomePage message="Hello World!" />)
-  .listen(3000);
+  .get('/', () => <HomePage message="Hello World!" />)
+  .listen(3000)
 ```
 
 ## Installation
@@ -24,18 +24,18 @@ bun add asleepace/elysiajs-react
 To get started import the `reactPlugin` from the package and use it with the `use` method of the Elysia instance, you can specify several configuration options to customize the behavior of the plugin.
 
 ```tsx
-import { reactPlugin } from "elysiajs-react";
+import { reactPlugin } from 'elysiajs-react'
 
 const app = new Elysia()
   .use(
     reactPlugin({
-      publicPath: "public",
+      publicPath: 'public',
       waitForStream: true,
-      tempDir: "src",
+      tempDir: 'src',
     })
   )
-  .get("/", () => <HomePage message="Hello World!" />)
-  .listen(3000);
+  .get('/', () => <HomePage message="Hello World!" />)
+  .listen(3000)
 ```
 
 ## Troubleshooting
@@ -49,19 +49,19 @@ If you encounter any hydration try checking the following things:
 
 ## TSConfig
 
-Please add the following to your `tsconfig.json` file:
+Please add the following to your `tsconfig.json` file, for more information please visit https://legacy.reactjs.org/blog/2020/09/22/introducing-the-new-jsx-transform.html
 
 ```json
 {
   "compilerOptions": {
     "target": "ES2021",
-    "jsx": "react",
-    "jsxFactory": "React.createElement",
-    "moduleResolution": "node",                       
+    "jsx": "react-jsx",
+    // "jsxFactory": "React.createElement",
+    "moduleResolution": "node",
     "types": ["bun-types"],
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-    "strict": true,
+    "strict": true
   }
 }
 ```
