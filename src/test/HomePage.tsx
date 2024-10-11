@@ -9,8 +9,6 @@ export default function HomePage(props: HomePageProps) {
 
   const [counter, setCounter] = React.useState(0)
 
-  console.log("[render] HomePage", props)
-
   useEffect(() => {
     console.log("[effect] HomePage mounted")
     return () => {

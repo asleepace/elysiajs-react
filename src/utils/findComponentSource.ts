@@ -1,19 +1,22 @@
 
 
+export type SourceConfig = {
+  component: React.ReactElement
+  sources: string[]
+}
 
 
-export async function source(reactNode: React.ReactElement, sources: string[]) {
+export async function findComponentSource({ component, sources }: SourceConfig): Promise<string> {
   // extract the react node type
-  const reactNodeType = reactNode['type']
-  console.log('[source] reactType', reactNodeType, typeof reactNodeType, reactNodeType.toString())
+  const reactComponentType = component['type']
 
   // check if the react node is a function component
-  if (typeof reactNodeType !== 'function') {
+  if (typeof reactComponentType !== 'function') {
     throw new Error('Expected a function component')
   }
 
   // extract the function name from the react node
-  const sourceFunctionName = reactNodeType.name
+  const sourceFunctionName = reactComponentType.name
 
   // check if the function name is not empty
   if (!sourceFunctionName) {
