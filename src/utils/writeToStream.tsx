@@ -17,7 +17,7 @@ export async function writeToStream({
 
   console.log("initialProps", initialProps);
   const stream = await renderToReadableStream(component, {
-    bootstrapScriptContent: `window.__INITIAL_PROPS__ = ${initialProps}`,
+    //bootstrapScriptContent: `window.__INITIAL_PROPS__ = ${initialProps}`,
     bootstrapScripts: [clientSideJS],
   });
 

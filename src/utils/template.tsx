@@ -1,4 +1,4 @@
-export const template = (importStatement: string) => `/// <reference lib="dom" />
+export const template = (importStatement: string, initialProps: any = {}) => `/// <reference lib="dom" />
 /// <reference lib="dom.iterable" />
 import React from "react";
 import { hydrateRoot } from "react-dom/client";

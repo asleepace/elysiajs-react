@@ -38,36 +38,10 @@ const app = new Elysia()
   .listen(3000);
 ```
 
-## Caveats
+## Troubleshooting
 
-You will need to create an `HTMLContainer` component that will be used to render the React application, this component will receive the `children` prop that will be the React application.
+If you encounter any hydration try checking the following things:
 
-```tsx
-import React from "react";
-
-export const HTMLContainer: React.FC<{ children: React.ReactNode }> = ({ children }) => (
-  <html>
-    <head>
-      <title>ElysiaJS React SSR</title>
-    </head>
-    <body>
-      <div id="root">{children}</div>
-    </body>
-  </html>
-);
-```
-
-Then when creating new pages you will need to wrap the component with the `HTMLContainer` component.
-
-```tsx
-import React from "react";
-import { HTMLContainer } from "./HTMLContainer";
-
-export const HomePage: React.FC<{ message: string }> = ({ message }) => (
-  <HTMLContainer>
-    <h1>{message}</h1>
-  </HTMLContainer>
-);
-```
-
-Otherwise the plugin will insert the scripts / initial props outside the `#root` div.
+- Disable all browser extensions
+- Remove any `new Date()` rendered on the server & client
+- Make sure all the HTML is valid
