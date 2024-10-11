@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react'
-import './styles.css'
+import '../styles.css'
 
 export type HomePageProps = {
   message: string
 }
 
-export default function HomePage(props: HomePageProps) {
+export default function App(props: HomePageProps) {
   const [counter, setCounter] = useState(0)
 
   useEffect(() => {

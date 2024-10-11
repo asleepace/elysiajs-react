@@ -16,6 +16,8 @@ declare interface Window {
 }
 å
 
-declare module 'server-components/index.js' {
-  export default function ServerComponent(): JSX.Element
+declare module './server-components' {
+  export module 'index.js' {
+    export default ServerComponent
+  }
 }

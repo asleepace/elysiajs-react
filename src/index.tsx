@@ -1,51 +1,52 @@
 import { Elysia } from 'elysia'
-import { reactPlugin } from './reactPlugin'
 import { staticPlugin } from '@elysiajs/static'
-import HomePage from './HomePage'
-import { writeToStream } from './utils/writeToStream'
+import HomePage from './react/HomePage'
+
+import { serverRender } from './server/serverRender'
 
 const app = new Elysia()
   .use(staticPlugin())
-  .use(
-    reactPlugin({
-      publicPath: 'public',
-      verbose: true,
-    })
-  )
+  // .use(
+  // reactPlugin({
+  //   publicPath: 'public',
+  //   verbose: true,
+  // })
+  // )
   .state('props', {
     message: 'Hello World',
   })
   .onStart(async () => {
-    console.log('[index] app started')
-
-    await Bun.build({
-      entrypoints: ['./src/react/index.tsx'],
-      outdir: 'server-components',
+    // console.log('[index] app started')
+    // await Bun.build({
+    //   entrypoints: ['./src/react/index.tsx'],
+    //   outdir: 'server-components',
+    // })
+  })
+  .get('/', async () => {
+    return serverRender({
+      // module: HomePageSource,
+      module: 'src/react/HomePage.tsx',
+      props: {
+        message: 'Hello World',
+      },
     })
   })
-  .get('/', ({ store: { props } }) => <HomePage {...props} />)
+
   .get('/server-component', async () => {
-    console.log('[index] server-component called!')
-
-    const { default: ServerComponent }: any = await import(
-      '../server-components/index.js'
-    )
-
-    console.log('[index] ServerComponent:', ServerComponent)
-    const stream = await writeToStream({
-      component: <ServerComponent />,
-      clientBundle: {
-        clientSideJS: '',
-        clientTempTS: '',
-        extraModules: [],
-      },
-    })
-
-    return new Response(stream, {
-      headers: {
-        'Content-Type': 'text/html',
-      },
-    })
+    // console.log('[index] server-component called!')
+    // const stream = await writeToStream({
+    //   component: <ServerComponent />,
+    //   clientBundle: {
+    //     clientSideJS: '',
+    //     clientTempTS: '',
+    //     extraModules: [],
+    //   },
+    // })
+    // return new Response(stream, {
+    //   headers: {
+    //     'Content-Type': 'text/html',
+    //   },
+    // })
   })
   .get('/hello', () => () => <HomePage message="Hello World" />)
   .get('/styles.css', () => {

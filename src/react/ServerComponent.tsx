@@ -1,5 +1,5 @@
 import { Suspense } from 'react'
-import { HTMLContainer } from './HTMLContainer'
+import HTMLContainer from './HTMLContainer'
 import { AuthorName } from './AuthorName'
 import { api } from './api'
 
