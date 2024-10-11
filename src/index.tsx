@@ -5,7 +5,7 @@ import React from 'react';
 
 const app = new Elysia()
   .use(reactPlugin({
-
+    publicPath: 'public',
   }))
   .get('/', () => <HomePage message="Hello World!" />)
   .get('*', ({ request }) => {
