@@ -1,6 +1,6 @@
-import React from "react";
+import React from 'react'
 
-export type HTMLPageProps = React.PropsWithChildren<{}>;
+export type HTMLPageProps = React.PropsWithChildren<{}>
 
 export function HTMLPage({ children }: HTMLPageProps) {
   return (
@@ -12,5 +12,5 @@ export function HTMLPage({ children }: HTMLPageProps) {
       </head>
       <body>{children}</body>
     </html>
-  );
+  )
 }

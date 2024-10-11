@@ -1,12 +1,12 @@
-
-
 export type SourceConfig = {
   component: React.ReactElement
   sources: string[]
 }
 
-
-export async function findComponentSource({ component, sources }: SourceConfig): Promise<string> {
+export async function findComponentSource({
+  component,
+  sources,
+}: SourceConfig): Promise<string> {
   // extract the react node type
   const reactComponentType = component['type']
 
@@ -24,7 +24,9 @@ export async function findComponentSource({ component, sources }: SourceConfig):
   }
 
   // check if function name is in the sources
-  const importStatement = sources.find((source) => source.includes(sourceFunctionName))
+  const importStatement = sources.find((source) =>
+    source.includes(sourceFunctionName)
+  )
 
   // check if import statement is found
   if (!importStatement) {

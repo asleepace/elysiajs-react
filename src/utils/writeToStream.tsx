@@ -1,31 +1,51 @@
-import React from "react";
-import { renderToReadableStream } from "react-dom/server.browser";
-import { unlink } from "node:fs/promises";
+import React from 'react'
+import {
+  ReactDOMServerReadableStream,
+  renderToReadableStream,
+} from 'react-dom/server.browser'
+import { ReactBundledCode } from './createClientSideJS'
 
-export type WriteToStreamConfig = {
-  component: React.ReactElement;
-  waitForStream?: boolean;
-  clientSideJS: string;
-};
+export type ReactStreamConfig = {
+  clientBundle: ReactBundledCode
+  component: React.ReactElement
+  waitForStream?: boolean
+  publicPath?: string
+  verbose?: boolean
+}
 
+/**
+ * Writes a React element to a readable stream which can be sent to the client
+ * as the body of a response. Takes a client side js file path to include in the
+ * response for hydrating the client, and an optional flag to wait for the stream
+ * to completely render before returning.
+ */
 export async function writeToStream({
   component,
-  clientSideJS,
+  clientBundle,
+  verbose,
   waitForStream = true,
-}: WriteToStreamConfig) {
-  const initialProps = JSON.stringify(component["props"] || {});
+}: ReactStreamConfig): Promise<ReactDOMServerReadableStream> {
+  const initialProps = JSON.stringify(component['props'] || {})
+  const { clientSideJS } = clientBundle
 
-  const filePath = clientSideJS.split("public/").pop();
-  const publicFilePath = `public/${filePath}`;
+  console.log('[reactPlugin] component', component)
 
-  const stream = await renderToReadableStream(component, {
-    bootstrapScriptContent: `window.__INITIAL_PROPS__ = ${initialProps}`,
-    bootstrapScripts: [publicFilePath],
-  });
+  const filePath = clientSideJS.split('public/').pop()
+  const publicFilePath = `public/${filePath}`
 
-  if (waitForStream) {
-    await stream.allReady;
+  if (verbose) {
+    console.log('[reactPlugin] public path:', publicFilePath)
+    console.log('[reactPlugin] client side js:', clientSideJS)
+    console.log('[reactPlugin] initial props:', initialProps)
   }
 
-  return stream;
+  const stream = await renderToReadableStream(component, {
+    bootstrapScriptContent: `window.__INITIAL_PROPS__ = ${initialProps};`,
+    bootstrapScripts: [publicFilePath],
+  })
+
+  // wait for the stream to completely render
+  if (waitForStream) await stream.allReady
+
+  return stream
 }

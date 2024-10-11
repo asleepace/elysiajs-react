@@ -1,0 +1,46 @@
+html,
+body {
+  margin: 0;
+  padding: 64px;
+  font-family: 'Roboto', sans-serif;
+  font-size: xx-large;
+  background-color: rgb(31, 32, 33);
+  color: 'white';
+  min-height: svh;
+  display: flex;
+  width: vw;
+  flex: 1;
+}
+
+#container {
+  width: 80%;
+  margin: auto auto;
+}
+
+h1 {
+  font-size: 64px;
+  line-height: 72px;
+  color: white;
+  margin-bottom: 20px;
+}
+
+p {
+  font-size: 24px;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 32px;
+  letter-spacing: 0.2px;
+}
+
+button {
+  padding-left: 64px;
+  padding-right: 64px;
+  padding-top: 16px;
+  padding-bottom: 16px;
+  letter-spacing: 0.4px;
+  font-size: large;
+  font-weight: '500';
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+  border: none;
+  border-radius: 8px;
+}

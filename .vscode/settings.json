@@ -1,7 +1,12 @@
 {
+  "editor.formatOnSave": true,
+  "prettier.semi": false,
+  "prettier.singleQuote": true,
   "cSpell.words": [
+    "codepaths",
     "Elysia",
     "elysiajs",
-    "outdir"
+    "outdir",
+    "tsbuildinfo"
   ]
 }

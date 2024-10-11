@@ -1,29 +1,30 @@
-import React, { useEffect } from "react";
-import { HTMLPage } from "./HTMLPage";
+import React, { useEffect } from 'react'
+import './styles.css'
 
 export type HomePageProps = {
-  message: string;
-};
+  message: string
+}
 
 export default function HomePage(props: HomePageProps) {
-  const [counter, setCounter] = React.useState(0);
+  const [counter, setCounter] = React.useState(0)
 
   useEffect(() => {
-    console.log("[effect] HomePage mounted: ", props);
+    console.log('[effect] HomePage mounted: ', props)
     return () => {
-      console.log("[cleanup] HomePage unmounted");
-    };
-  }, []);
+      console.log('[cleanup] HomePage unmounted')
+    }
+  }, [])
 
   return (
     <html lang="en">
       <head>
         <meta charSet="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <link rel="stylesheet" href="/styles.css" />
         <title>Document</title>
       </head>
       <body>
-        <div>
+        <div id="container">
           <h1>React Application</h1>
           <p>{props.message}</p>
           <p>Counter: {counter}</p>
@@ -31,5 +32,5 @@ export default function HomePage(props: HomePageProps) {
         </div>
       </body>
     </html>
-  );
+  )
 }
