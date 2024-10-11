@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import './styles.css'
 
 export type HomePageProps = {
@@ -6,7 +6,7 @@ export type HomePageProps = {
 }
 
 export default function HomePage(props: HomePageProps) {
-  const [counter, setCounter] = React.useState(0)
+  const [counter, setCounter] = useState(0)
 
   useEffect(() => {
     console.log('[effect] HomePage mounted: ', props)

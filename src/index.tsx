@@ -2,7 +2,6 @@ import { Elysia } from 'elysia'
 import { reactPlugin } from './reactPlugin'
 import { staticPlugin } from '@elysiajs/static'
 import HomePage from './HomePage'
-import React from 'react'
 
 const app = new Elysia()
   .use(staticPlugin())
