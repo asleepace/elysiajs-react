@@ -1,17 +1,17 @@
 import { Elysia } from "elysia";
 import { reactPlugin } from "./reactPlugin";
-import HomePage from './test/HomePage';
-import React from 'react';
+import { staticPlugin } from "@elysiajs/static";
+import HomePage from "./test/HomePage";
+import React from "react";
 
 const app = new Elysia()
-  .use(reactPlugin({
-    publicPath: 'public',
-  }))
-  .get('/', () => <HomePage message="Hello World!" />)
-  .get('*', ({ request }) => {
-    const publicFile = request.url.split('public/').pop()!
-    return Bun.file(`./public/${publicFile}`)
-  })
+  .use(staticPlugin())
+  .use(
+    reactPlugin({
+      publicPath: "public",
+    })
+  )
+  .get("/", () => <HomePage message="Another One" />)
   .listen(3000);
 
 console.log(

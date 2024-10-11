@@ -1,27 +1,29 @@
 import React from "react";
 import { renderToReadableStream } from "react-dom/server.browser";
-import { unlink } from 'node:fs/promises';
+import { unlink } from "node:fs/promises";
 
 export type WriteToStreamConfig = {
   component: React.ReactElement;
-  waitForStreamToFinish?: boolean;
+  waitForStream?: boolean;
   clientSideJS: string;
 };
 
 export async function writeToStream({
   component,
   clientSideJS,
-  waitForStreamToFinish = true,
+  waitForStream = true,
 }: WriteToStreamConfig) {
   const initialProps = JSON.stringify(component["props"] || {});
 
-  console.log("initialProps", initialProps);
+  const filePath = clientSideJS.split("public/").pop();
+  const publicFilePath = `public/${filePath}`;
+
   const stream = await renderToReadableStream(component, {
-    //bootstrapScriptContent: `window.__INITIAL_PROPS__ = ${initialProps}`,
-    bootstrapScripts: [clientSideJS],
+    bootstrapScriptContent: `window.__INITIAL_PROPS__ = ${initialProps}`,
+    bootstrapScripts: [publicFilePath],
   });
 
-  if (waitForStreamToFinish) {
+  if (waitForStream) {
     await stream.allReady;
   }
 
