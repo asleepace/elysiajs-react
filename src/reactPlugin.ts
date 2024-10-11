@@ -1,6 +1,11 @@
 import Elysia from "elysia";
 import { ReactPlugin, type ReactPluginConfig } from "./plugin/reactPlugin";
 
+/**
+ * The ReactPlugin is a plugin for Elysia that allows you to server side render
+ * React components. This plugin is designed to work with the `staticPlugin` and
+ * and will generate client side js files on the fly for each React component.
+ */
 export const reactPlugin = (config: ReactPluginConfig) => (app: Elysia) =>
   app
     /**
