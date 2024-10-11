@@ -45,3 +45,23 @@ If you encounter any hydration try checking the following things:
 - Disable all browser extensions
 - Remove any `new Date()` rendered on the server & client
 - Make sure all the HTML is valid
+- Check TS config settings below
+
+## TSConfig
+
+Please add the following to your `tsconfig.json` file:
+
+```json
+{
+  "compilerOptions": {
+    "target": "ES2021",
+    "jsx": "react",
+    "jsxFactory": "React.createElement",
+    "moduleResolution": "node",                       
+    "types": ["bun-types"],
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+  }
+}
+```

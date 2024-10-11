@@ -1,6 +1,12 @@
 {
   "name": "elysiajs-react",
-  "version": "1.0.50",
+  "version": "1.0.6",
+  "author": {
+    "name": "asleepace",
+    "email": "contact@asleepace.com",
+    "url": "https://github.com/asleepace"
+  },
+  "module": "src/index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "bun run --watch src/index.tsx"
@@ -15,6 +21,5 @@
     "@types/react": "^18.3.11",
     "@types/react-dom": "^18.3.0",
     "bun-types": "latest"
-  },
-  "module": "src/index.js"
+  }
 }

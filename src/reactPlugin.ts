@@ -28,9 +28,7 @@ export const reactPlugin = (config: ReactPluginConfig) => (app: Elysia) =>
      * Check if the response is a React element and server side render it,
      * otherwise return the response as is.
      */
-    .onAfterHandle(async ({ response, reactPlugin, ...ctx }) => {
-      console.log("[reactPlugin] onAfterHandle", ctx);
-
+    .onAfterHandle(async ({ response, reactPlugin }) => {
       if (reactPlugin.isReact(response)) {
         return reactPlugin.serverSideRender(response);
       } else {
