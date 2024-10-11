@@ -22,6 +22,8 @@
     "@types/react-dom": "npm:types-react-dom@rc"
   },
   "devDependencies": {
+    "@types/react": "^19.0.0-rc-09111202-20241011",
+    "@types/react-dom": "^19.0.0-rc-09111202-20241011",
     "bun-types": "latest"
   }
 }

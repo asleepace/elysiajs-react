@@ -44,6 +44,12 @@ The following section is about React Server Components, if you are not using Rea
 
 https://react.dev/blog/2024/04/25/react-19-upgrade-guide
 
+## Configuring Asset Files
+
+React the following excellent guide on how to configure asset files for your React application.
+
+https://react.dev/reference/react-dom/server/renderToReadableStream#reading-css-and-js-asset-paths-from-the-build-output
+
 ## Troubleshooting
 
 If you encounter any hydration try checking the following things:
