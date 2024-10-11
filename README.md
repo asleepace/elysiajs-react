@@ -38,6 +38,12 @@ const app = new Elysia()
   .listen(3000)
 ```
 
+## React Server Components
+
+The following section is about React Server Components, if you are not using React Server Components you can skip this section.
+
+https://react.dev/blog/2024/04/25/react-19-upgrade-guide
+
 ## Troubleshooting
 
 If you encounter any hydration try checking the following things:
