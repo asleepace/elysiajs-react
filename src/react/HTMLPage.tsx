@@ -1,5 +1,3 @@
-import React from 'react'
-
 export type HTMLPageProps = React.PropsWithChildren<{}>
 
 export function HTMLPage({ children }: HTMLPageProps) {

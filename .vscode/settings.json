@@ -2,6 +2,9 @@
   "editor.formatOnSave": true,
   "prettier.semi": false,
   "prettier.singleQuote": true,
+  "editor.codeActionsOnSave": {
+    "source.removeUnusedImports": "always"
+  },
   "cSpell.words": [
     "codepaths",
     "Elysia",

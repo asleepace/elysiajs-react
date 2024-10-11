@@ -4,6 +4,7 @@ import {
   renderToReadableStream,
 } from 'react-dom/server.browser'
 import { ReactBundledCode } from './createClientSideJS'
+import { enumerateReactChildren } from './HTMLHoisting'
 
 export type ReactStreamConfig = {
   clientBundle: ReactBundledCode
@@ -27,6 +28,8 @@ export async function writeToStream({
 }: ReactStreamConfig): Promise<ReactDOMServerReadableStream> {
   const initialProps = JSON.stringify(component['props'] || {})
   const { clientSideJS } = clientBundle
+
+  enumerateReactChildren(component)
 
   console.log('[reactPlugin] component', component)
 

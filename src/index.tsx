@@ -12,7 +12,10 @@ const app = new Elysia()
       verbose: true,
     })
   )
-  .get('/', () => <HomePage message="Another One" />)
+  .state('props', {
+    message: 'Hello World',
+  })
+  .get('/', ({ store: { props } }) => <HomePage {...props} />)
   .get('/hello', () => () => <HomePage message="Hello World" />)
   .get('/styles.css', () => {
     console.log('[index] serving styles.css')
