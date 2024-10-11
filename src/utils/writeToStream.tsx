@@ -1,5 +1,6 @@
 import React from "react";
 import { renderToReadableStream } from "react-dom/server.browser";
+import { unlink } from 'node:fs/promises';
 
 export type WriteToStreamConfig = {
   component: React.ReactElement;

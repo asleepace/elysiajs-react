@@ -1,4 +1,5 @@
 import { template } from "./template";
+import { unlink } from 'node:fs/promises';
 
 export type ClientJS = {
   importStatement: string;
@@ -57,6 +58,8 @@ export async function createClientSideJS<T extends {}>({
   if (!build.success) {
     console.error("[reactPlugin] build failed", build.outputs);
     throw new Error("Build failed");
+  } else {
+    unlink(tempEntryFile).catch(console.warn);
   }
 
   const clientSideJS = build.outputs[0].path;

@@ -18,7 +18,7 @@ export default function HomePage(props: HomePageProps) {
   return (
     <HTMLPage>
       <div>
-        <h1>Hello, world!</h1>
+        <h1>React Application</h1>
         <p>{props.message}</p>
         <p>Counter: {counter}</p>
         <button onClick={() => setCounter(counter + 1)}>Increment</button>
