@@ -28,9 +28,9 @@ export const reactPlugin =
       .onError((err) => {
         console.warn("[reactPlugin] error", err);
       })
-      .onStart(async ({ decorator }) => {
+      .onStart(async ({ decorator: { reactPlugin } }) => {
         const sources = await findImports(Bun.main);
-        decorator.reactPlugin.sources.push(...sources);
+        reactPlugin.sources.push(...sources);
       })
       .onStart(async (ctx) => {
         // delete the client side js file
@@ -41,7 +41,7 @@ export const reactPlugin =
           .catch(console.warn);
       })
 
-      .onAfterHandle(async ({ response: component, reactPlugin }) => {
+      .onAfterHandle(async ({ response: component, reactPlugin, set }) => {
         // check if the response is a react component
         if (!isReactComponent(component)) return component;
 
@@ -63,9 +63,15 @@ export const reactPlugin =
         });
 
         // write the component to a stream
-        return writeToStream({
+        const output = await writeToStream({
           component,
           clientSideJS,
           waitForStreamToFinish,
+        });
+
+        return new Response(output, {
+          headers: {
+            "Content-Type": "text/html; charset=utf-8",
+          },
         });
       });
