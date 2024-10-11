@@ -4,6 +4,7 @@ import { findImports } from './findImports'
 import { findComponentSource } from './findComponentSource'
 import { createClientSideJS } from './createClientSideJS'
 import { writeToStream } from './writeToStream'
+import React from 'react'
 
 export type ReactPluginConfig = {
   tempDir?: string
@@ -109,11 +110,7 @@ export class ReactPlugin {
    * response should be server side rendered by the plugin.
    */
   public isReact(response: any): response is React.ReactElement {
-    return (
-      response &&
-      '$$typeof' in response &&
-      response.$$typeof === Symbol.for('react.element')
-    )
+    return React.isValidElement(response)
   }
 
   /**

@@ -21,7 +21,7 @@ export default function HomePage(props: HomePageProps) {
         <meta charSet="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link rel="stylesheet" href="/styles.css" />
-        <title>Document</title>
+        <title>Test</title>
       </head>
       <body>
         <div id="container">
