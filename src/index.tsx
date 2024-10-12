@@ -29,6 +29,12 @@ const app = new Elysia()
       props: {
         message: 'Hello World',
       },
+      buildConfig: {
+        outdir: 'public',
+        naming: {
+          asset: '[name].[ext]',
+        },
+      },
     })
   })
 

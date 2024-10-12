@@ -3,10 +3,13 @@ import { renderToReadableStream } from 'react-dom/server.browser'
 import { template } from '../utils/template'
 import { dirname, resolve, join } from 'path'
 import { fileURLToPath } from 'url'
+import { unlink } from 'node:fs/promises'
+import { BuildConfig } from 'bun'
 
 export type SSROptions = {
   module: any | Promise<any>
   props: any
+  buildConfig?: Partial<BuildConfig>
 }
 
 export type ModuleDefault = {
@@ -17,13 +20,11 @@ export type ModuleNamed = Record<string, React.ComponentType<any>>
 
 export type Module = ModuleDefault | ModuleNamed
 
-function getCurrentDirectory() {
+const getCurrentDirectory = () => {
   return dirname(fileURLToPath(import.meta.url))
 }
 
-function file(path: string) {
-  return ['file://', path].join('')
-}
+const file = (path: string) => ['file://', path].join('')
 
 const isDefaultExport = (module: Module): module is ModuleDefault =>
   Boolean('default' in module && module.default)
@@ -43,6 +44,7 @@ const findFirstExport = (module: Module): any => {
 export async function serverRender({
   module,
   props,
+  buildConfig,
 }: SSROptions): Promise<Response> {
   try {
     const dir = getCurrentDirectory()
@@ -58,7 +60,9 @@ export async function serverRender({
       throw new Error('Component is not a valid React element')
     }
 
-    const clientJSCode = await buildClientJS(source.absolutePath)
+    // build the client-side JS code and render the element to a readable stream,
+    // and serialize the initial props to a JSON string.
+    const clientJSCode = await buildClientJS(source.absolutePath, buildConfig)
     const initialProps = JSON.stringify(props)
 
     const toPublicPath = (path: string) => `public/${path}`
@@ -75,8 +79,10 @@ export async function serverRender({
       headers: { 'Content-Type': 'text/html' },
     })
   } catch (error) {
-    console.error('[serverRender] Error:', error)
-    return new Response('Internal Server Error', { status: 500 })
+    console.warn('[serverRender] Error:', error)
+    return new Response((error as Error)?.message || 'Internal Server Error', {
+      status: 500,
+    })
   }
 }
 
@@ -94,7 +100,13 @@ async function importSource(source: string, currentDir: string) {
 /**
  * Helper method for building the client-side JS code.
  */
-async function buildClientJS(absoluteFilePath: string): Promise<string[]> {
+async function buildClientJS(
+  absoluteFilePath: string,
+  {
+    outdir = 'public',
+    naming = { asset: '[file].[ext]' },
+  }: Partial<BuildConfig> = {}
+): Promise<string[]> {
   const dir = getCurrentDirectory()
   const resolvedPath = resolve(dir, absoluteFilePath)
   console.log('[serverRender] resolvedPath:', resolvedPath)
@@ -107,12 +119,14 @@ async function buildClientJS(absoluteFilePath: string): Promise<string[]> {
 
   const buildOutput = await Bun.build({
     entrypoints: [tempName],
-    outdir: 'public',
+    naming,
+    outdir,
   })
 
-  console.log('buildOutput:', buildOutput)
+  await unlink(tempName) // cleanup
+  console.log('[serverRender] buildOutput:', buildOutput)
 
   return buildOutput.outputs
     .filter((o) => o.path.endsWith('.js'))
-    .map((file) => file.path.split('public/')[1])
+    .map((file) => file.path.split(`${outdir}/`)[1])
 }
