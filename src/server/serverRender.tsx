@@ -42,6 +42,7 @@ export type SSROptions = {
   props: any
   waitForStream?: boolean
   buildConfig?: Partial<BuildConfig>
+  assetMap?: Record<string, string>
 }
 
 /**
@@ -65,11 +66,16 @@ export async function ssr(options: SSROptions) {
  * This method is used to locate the specified module, import it, and render the
  * React element to a readable stream. The client-side JS code is generated on
  * the the fly and the initial props are serialized to a JSON string.
+ *
+ *    1. Determine the absolute path of the module and import it.
+ *    2. Generate client-side javascript code for the module.
+ *    3. Render the React element to a readable stream.
  */
 export async function serverRender({
   module,
   props,
   buildConfig,
+  assetMap,
   waitForStream = true,
 }: SSROptions): Promise<ReactDOMServerReadableStream> {
   const dir = getCurrentDirectory()
@@ -87,14 +93,14 @@ export async function serverRender({
   // build the client-side JS code and render the element to a readable stream,
   // and serialize the initial props to a JSON string.
   const clientJSCode = await buildClientJS(source.absolutePath, buildConfig)
-  const initialProps = JSON.stringify(props)
+  const bootstrapScriptContent = makeBootstrapContent(props, assetMap)
 
   // render the jsx element to a readable stream and return the response, the
   // bootstrap script content is used to pass the initial props to the client,
   // and the bootstrap scripts are the client-side JS code to hydrate the app.
   const stream = await renderToReadableStream(element, {
-    bootstrapScriptContent: `window.__INITIAL_PROPS__ = ${initialProps}`,
     bootstrapScripts: clientJSCode,
+    bootstrapScriptContent,
   })
 
   // (optional) wait for the stream to be ready before returning the response.
@@ -147,4 +153,13 @@ async function buildClientJS(
       const filePath = file.path.split(`${outdir}/`)[1]
       return [outdir, filePath].join('/')
     })
+}
+
+function makeBootstrapContent(
+  initialProps: any,
+  assetMap: Record<string, string> = {}
+) {
+  return `window.__INITIAL_PROPS__ = ${JSON.stringify(
+    initialProps
+  )}; window.__ASSET_MAP__ = ${JSON.stringify(assetMap)};`
 }
