@@ -9,6 +9,34 @@ export type SSROptions = {
   props: any
 }
 
+export type ModuleDefault = {
+  default?: React.ComponentType<any>
+}
+
+export type ModuleNamed = Record<string, React.ComponentType<any>>
+
+export type Module = ModuleDefault | ModuleNamed
+
+function getCurrentDirectory() {
+  return dirname(fileURLToPath(import.meta.url))
+}
+
+function file(path: string) {
+  return ['file://', path].join('')
+}
+
+const isDefaultExport = (module: Module): module is ModuleDefault =>
+  Boolean('default' in module && module.default)
+
+const findFirstExport = (module: Module): any => {
+  if (isDefaultExport(module)) return module.default
+  const keys = Object.keys(module)
+  for (const key of keys) {
+    if (typeof module[key] === 'function') return module[key]
+  }
+  throw new Error('No export found')
+}
+
 /**
  * Helper method for server-side rendering a react component.
  */
@@ -17,20 +45,28 @@ export async function serverRender({
   props,
 }: SSROptions): Promise<Response> {
   try {
-    const currentDir = dirname(fileURLToPath(import.meta.url))
-    const { Component, filePath } = await importComponent(module, currentDir)
-    const element = React.createElement(Component, props)
+    const dir = getCurrentDirectory()
+    const source = await importSource(module, dir)
+    console.log('[serverRender] source:', source)
+
+    // attempt to load the default export or the first named export
+    // then create a React element with the given props.
+    const component = findFirstExport(source.exported)
+    const element = React.createElement(component, props)
 
     if (!React.isValidElement(element)) {
       throw new Error('Component is not a valid React element')
     }
 
-    const clientJSCode = await buildClientJS(filePath, currentDir)
+    const clientJSCode = await buildClientJS(source.absolutePath)
     const initialProps = JSON.stringify(props)
 
+    const toPublicPath = (path: string) => `public/${path}`
+    const addContentJS = `window.__INITIAL_PROPS__ = ${initialProps}`
+
     const stream = await renderToReadableStream(element, {
-      bootstrapScriptContent: `window.__INITIAL_PROPS__ = ${initialProps}`,
-      bootstrapScripts: clientJSCode.map((path) => `public/${path}`),
+      bootstrapScripts: clientJSCode.map(toPublicPath),
+      bootstrapScriptContent: addContentJS,
     })
 
     await stream.allReady
@@ -47,21 +83,20 @@ export async function serverRender({
 /**
  * Helper method for importing a component from a file path.
  */
-async function importComponent(source: string, currentDir: string) {
+async function importSource(source: string, currentDir: string) {
   const projectRoot = resolve(currentDir, '../..')
   const absolutePath = join(projectRoot, source)
-  const { default: Component } = await import(`file://${absolutePath}`)
-  return { Component, filePath: `file://${absolutePath}` }
+  const relativePath = resolve(currentDir, absolutePath)
+  const exported: Module = await import(file(relativePath))
+  return { exported, absolutePath, relativePath }
 }
 
 /**
  * Helper method for building the client-side JS code.
  */
-async function buildClientJS(
-  filePath: string,
-  currentDir: string
-): Promise<string[]> {
-  const resolvedPath = resolve(currentDir, filePath.replace('file://', ''))
+async function buildClientJS(absoluteFilePath: string): Promise<string[]> {
+  const dir = getCurrentDirectory()
+  const resolvedPath = resolve(dir, absoluteFilePath)
   console.log('[serverRender] resolvedPath:', resolvedPath)
 
   const templateString = template(`import App from '${resolvedPath}'`)
