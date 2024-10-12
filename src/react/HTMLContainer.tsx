@@ -2,7 +2,7 @@ export type HTMLContainerProps = React.PropsWithChildren<{
   title?: string
 }>
 
-export function HTMLContainer(props: HTMLContainerProps) {
+export default function HTMLContainer(props: HTMLContainerProps) {
   return (
     <html lang="en">
       <head>

@@ -1,9 +1,11 @@
 import { unlink } from 'node:fs/promises'
 import { template } from './template'
 import { findImports } from './findImports'
+import { findImportSources } from './findImportSources'
 import { findComponentSource } from './findComponentSource'
 import { createClientSideJS } from './createClientSideJS'
 import { writeToStream } from './writeToStream'
+import React from 'react'
 
 export type ReactPluginConfig = {
   tempDir?: string
@@ -48,6 +50,12 @@ export class ReactPlugin {
   public clients: string[] = []
 
   /**
+   * A map of import sources that are used to resolve the source file of the
+   * component, this can be used to override the source file of a component.
+   */
+  public importSourceMap: Record<string, string> = {}
+
+  /**
    * The template function that generates the client side js file, this
    * can be overridden by the user to customize the client side js file.
    */
@@ -56,7 +64,10 @@ export class ReactPlugin {
   /**
    * Create a new ReactPlugin instance with the given configuration.
    */
-  constructor(public config: ReactPluginConfig) {}
+  constructor(public config: ReactPluginConfig) {
+    const sources = findImportSources(Bun.main)
+    console.log('[ReactPlugin] sources:', sources)
+  }
 
   /**
    * Set the path to your public directory, this is where the client side
@@ -109,11 +120,7 @@ export class ReactPlugin {
    * response should be server side rendered by the plugin.
    */
   public isReact(response: any): response is React.ReactElement {
-    return (
-      response &&
-      '$$typeof' in response &&
-      response.$$typeof === Symbol.for('react.element')
-    )
+    return React.isValidElement(response)
   }
 
   /**

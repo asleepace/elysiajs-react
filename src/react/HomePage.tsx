@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react'
-import './styles.css'
+import '../styles.css'
 
 export type HomePageProps = {
   message: string
 }
 
-export default function HomePage(props: HomePageProps) {
+export default function App(props: HomePageProps) {
   const [counter, setCounter] = useState(0)
 
   useEffect(() => {
@@ -21,7 +21,7 @@ export default function HomePage(props: HomePageProps) {
         <meta charSet="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <link rel="stylesheet" href="/styles.css" />
-        <title>Document</title>
+        <title>Test</title>
       </head>
       <body>
         <div id="container">

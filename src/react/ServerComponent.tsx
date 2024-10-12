@@ -1,14 +1,16 @@
-'use server'
-
 import { Suspense } from 'react'
-import { HTMLContainer } from './HTMLContainer'
+import HTMLContainer from './HTMLContainer'
 import { AuthorName } from './AuthorName'
+import { api } from './api'
 
-export async function ServerComponent() {
+export default async function ServerComponent() {
+  console.log('[ServerComponent] mounting...')
+  const user = await api.fetchUser()
+
   return (
     <HTMLContainer title="Server Component">
-      <Suspense fallback={<div>Loading...</div>}>
-        <AuthorName />
+      <Suspense fallback={<p>Loading...</p>}>
+        <AuthorName name={user.name} />
       </Suspense>
     </HTMLContainer>
   )

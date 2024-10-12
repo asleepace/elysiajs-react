@@ -1,19 +1,13 @@
-export async function AuthorName() {
-  'use server'
+export type AuthorProps = {
+  name: string
+}
 
-  const authorName = await fetch('/author/asleepace', { method: 'GET' })
-    .then((res) => res.json())
-    .then((data) => data.name)
-    .catch((err) => {
-      console.error(err)
-      return 'error'
-    })
-
+export function AuthorName(props: AuthorProps) {
   return (
     <div
       style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}
     >
-      Author: {authorName}
+      Author: {props.name}
     </div>
   )
 }

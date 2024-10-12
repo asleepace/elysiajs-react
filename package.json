@@ -14,12 +14,16 @@
   "dependencies": {
     "@elysiajs/static": "^1.1.1",
     "elysia": "latest",
-    "react": "^18.3.1",
-    "react-dom": "^18.3.1"
+    "react": "^19.0.0-rc-09111202-20241011",
+    "react-dom": "^19.0.0-rc-09111202-20241011"
+  },
+  "overrides": {
+    "@types/react": "npm:types-react@rc",
+    "@types/react-dom": "npm:types-react-dom@rc"
   },
   "devDependencies": {
-    "@types/react": "^18.3.11",
-    "@types/react-dom": "^18.3.0",
+    "@types/react": "^19.0.0-rc-09111202-20241011",
+    "@types/react-dom": "^19.0.0-rc-09111202-20241011",
     "bun-types": "latest"
   }
 }
