@@ -2,7 +2,7 @@ import { Elysia } from 'elysia'
 import { staticPlugin } from '@elysiajs/static'
 import HomePage from './react/HomePage'
 
-import { serverRender } from './server/serverRender'
+import { ssr } from './server/serverRender'
 
 const app = new Elysia()
   .use(staticPlugin())
@@ -23,8 +23,7 @@ const app = new Elysia()
     // })
   })
   .get('/', async () => {
-    return serverRender({
-      // module: HomePageSource,
+    return ssr({
       module: 'src/react/HomePage.tsx',
       props: {
         message: 'Hello World',

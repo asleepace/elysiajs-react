@@ -1,16 +1,13 @@
 import React from 'react'
-import { renderToReadableStream } from 'react-dom/server.browser'
+import {
+  ReactDOMServerReadableStream,
+  renderToReadableStream,
+} from 'react-dom/server.browser'
 import { template } from '../utils/template'
 import { dirname, resolve, join } from 'path'
 import { fileURLToPath } from 'url'
 import { unlink } from 'node:fs/promises'
 import { BuildConfig } from 'bun'
-
-export type SSROptions = {
-  module: any | Promise<any>
-  props: any
-  buildConfig?: Partial<BuildConfig>
-}
 
 export type ModuleDefault = {
   default?: React.ComponentType<any>
@@ -20,9 +17,9 @@ export type ModuleNamed = Record<string, React.ComponentType<any>>
 
 export type Module = ModuleDefault | ModuleNamed
 
-const getCurrentDirectory = () => {
-  return dirname(fileURLToPath(import.meta.url))
-}
+// =============== Utils ===============
+
+const getCurrentDirectory = () => dirname(fileURLToPath(import.meta.url))
 
 const file = (path: string) => ['file://', path].join('')
 
@@ -38,52 +35,72 @@ const findFirstExport = (module: Module): any => {
   throw new Error('No export found')
 }
 
+// =============== SSR ===============
+
+export type SSROptions = {
+  module: any | Promise<any>
+  props: any
+  waitForStream?: boolean
+  buildConfig?: Partial<BuildConfig>
+}
+
 /**
- * Helper method for server-side rendering a react component.
+ * Server-side rendering method for React components which calls `serverRender`
+ * under the hood and returns an HTML response with the rendered content or
+ * an error message if the rendering fails.
+ */
+export async function ssr(options: SSROptions) {
+  try {
+    const stream = await serverRender(options)
+    return new Response(stream, {
+      headers: { 'Content-Type': 'text/html' },
+    })
+  } catch (error) {
+    const message = error instanceof Error ? error.message : 'Unknown error'
+    return new Response(message, { status: 500 })
+  }
+}
+
+/**
+ * This method is used to locate the specified module, import it, and render the
+ * React element to a readable stream. The client-side JS code is generated on
+ * the the fly and the initial props are serialized to a JSON string.
  */
 export async function serverRender({
   module,
   props,
   buildConfig,
-}: SSROptions): Promise<Response> {
-  try {
-    const dir = getCurrentDirectory()
-    const source = await importSource(module, dir)
-    console.log('[serverRender] source:', source)
+  waitForStream = true,
+}: SSROptions): Promise<ReactDOMServerReadableStream> {
+  const dir = getCurrentDirectory()
+  const source = await importSource(module, dir)
 
-    // attempt to load the default export or the first named export
-    // then create a React element with the given props.
-    const component = findFirstExport(source.exported)
-    const element = React.createElement(component, props)
+  // attempt to load the default export or the first named export
+  // then create a React element with the given props.
+  const component = findFirstExport(source.exported)
+  const element = React.createElement(component, props)
 
-    if (!React.isValidElement(element)) {
-      throw new Error('Component is not a valid React element')
-    }
-
-    // build the client-side JS code and render the element to a readable stream,
-    // and serialize the initial props to a JSON string.
-    const clientJSCode = await buildClientJS(source.absolutePath, buildConfig)
-    const initialProps = JSON.stringify(props)
-
-    const toPublicPath = (path: string) => `public/${path}`
-    const addContentJS = `window.__INITIAL_PROPS__ = ${initialProps}`
-
-    const stream = await renderToReadableStream(element, {
-      bootstrapScripts: clientJSCode.map(toPublicPath),
-      bootstrapScriptContent: addContentJS,
-    })
-
-    await stream.allReady
-
-    return new Response(stream, {
-      headers: { 'Content-Type': 'text/html' },
-    })
-  } catch (error) {
-    console.warn('[serverRender] Error:', error)
-    return new Response((error as Error)?.message || 'Internal Server Error', {
-      status: 500,
-    })
+  if (!React.isValidElement(element)) {
+    throw new Error('Component is not a valid React element')
   }
+
+  // build the client-side JS code and render the element to a readable stream,
+  // and serialize the initial props to a JSON string.
+  const clientJSCode = await buildClientJS(source.absolutePath, buildConfig)
+  const initialProps = JSON.stringify(props)
+
+  // render the jsx element to a readable stream and return the response, the
+  // bootstrap script content is used to pass the initial props to the client,
+  // and the bootstrap scripts are the client-side JS code to hydrate the app.
+  const stream = await renderToReadableStream(element, {
+    bootstrapScriptContent: `window.__INITIAL_PROPS__ = ${initialProps}`,
+    bootstrapScripts: clientJSCode,
+  })
+
+  // (optional) wait for the stream to be ready before returning the response.
+  if (waitForStream) await stream.allReady
+
+  return stream
 }
 
 /**
@@ -109,8 +126,6 @@ async function buildClientJS(
 ): Promise<string[]> {
   const dir = getCurrentDirectory()
   const resolvedPath = resolve(dir, absoluteFilePath)
-  console.log('[serverRender] resolvedPath:', resolvedPath)
-
   const templateString = template(`import App from '${resolvedPath}'`)
   const fileHash = Bun.hash(templateString)
   const tempName = `./client-${fileHash}.tsx`
@@ -125,8 +140,11 @@ async function buildClientJS(
 
   await unlink(tempName) // cleanup
   console.log('[serverRender] buildOutput:', buildOutput)
-
   return buildOutput.outputs
     .filter((o) => o.path.endsWith('.js'))
-    .map((file) => file.path.split(`${outdir}/`)[1])
+    .map((file) => {
+      // remove absolute file paths and return the public path
+      const filePath = file.path.split(`${outdir}/`)[1]
+      return [outdir, filePath].join('/')
+    })
 }
