@@ -15755,14 +15755,17 @@ var require_jsx_dev_runtime = __commonJS((exports, module) => {
   }
 });
 
-// client-4579149327340454516.tsx
+// client.tsx
 var import_react2 = __toESM(require_react(), 1);
 var client = __toESM(require_client(), 1);
 
 // src/react/HomePage.tsx
 var import_react = __toESM(require_react(), 1);
 var jsx_dev_runtime = __toESM(require_jsx_dev_runtime(), 1);
-function App(props) {
+function HomePage({
+  assetMap = {},
+  ...props
+}) {
   const [counter, setCounter] = import_react.useState(0);
   import_react.useEffect(() => {
     console.log("[effect] HomePage mounted: ", props);
@@ -15784,7 +15787,7 @@ function App(props) {
           }, undefined, false, undefined, this),
           jsx_dev_runtime.jsxDEV("link", {
             rel: "stylesheet",
-            href: "/styles.css"
+            href: assetMap.cssStyles
           }, undefined, false, undefined, this),
           jsx_dev_runtime.jsxDEV("title", {
             children: "Test"
@@ -15818,10 +15821,10 @@ function App(props) {
   }, undefined, true, undefined, this);
 }
 
-// client-4579149327340454516.tsx
+// client.tsx
 var jsx_dev_runtime2 = __toESM(require_jsx_dev_runtime(), 1);
 client.hydrateRoot(document.getElementById("root") || document, jsx_dev_runtime2.jsxDEV(import_react2.default.StrictMode, {
-  children: jsx_dev_runtime2.jsxDEV(App, {
+  children: jsx_dev_runtime2.jsxDEV(HomePage, {
     ...window.__INITIAL_PROPS__ || {}
   }, undefined, false, undefined, this)
 }, undefined, false, undefined, this));

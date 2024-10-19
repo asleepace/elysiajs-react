@@ -1,26 +1,15 @@
 import { Elysia } from 'elysia'
 import { staticPlugin } from '@elysiajs/static'
-import HomePage from './react/HomePage'
+import HomePage, { getPageProps } from './react/HomePage'
 
 import { ssr } from './server/serverRender'
+import { reactPlugin } from './reactPlugin'
 
 const app = new Elysia()
   .use(staticPlugin())
-  // .use(
-  // reactPlugin({
-  //   publicPath: 'public',
-  //   verbose: true,
-  // })
-  // )
+  .use(reactPlugin({}))
   .state('props', {
     message: 'Hello World',
-  })
-  .onStart(async () => {
-    // console.log('[index] app started')
-    // await Bun.build({
-    //   entrypoints: ['./src/react/index.tsx'],
-    //   outdir: 'server-components',
-    // })
   })
   .get('/', async () => {
     return ssr({
@@ -37,27 +26,11 @@ const app = new Elysia()
     })
   })
 
-  .get('/server-component', async () => {
-    // console.log('[index] server-component called!')
-    // const stream = await writeToStream({
-    //   component: <ServerComponent />,
-    //   clientBundle: {
-    //     clientSideJS: '',
-    //     clientTempTS: '',
-    //     extraModules: [],
-    //   },
-    // })
-    // return new Response(stream, {
-    //   headers: {
-    //     'Content-Type': 'text/html',
-    //   },
-    // })
+  .get('/rsc/*', async () => {
+    // TODO: Track all server components
   })
-  .get('/hello', () => () => <HomePage message="Hello World" />)
-  .get('/styles.css', () => {
-    console.log('[index] serving styles.css')
-    return Bun.file('public/styles.css')
-  })
+  .get('/hello', () => <HomePage {...getPageProps()} />)
+  .get('/styles.css', () => Bun.file('public/styles.css'))
   .get('/author/:name', ({ params, set }) => {
     set.headers['Content-Type'] = 'application/json'
     console.log('[index] author name:', params.name)

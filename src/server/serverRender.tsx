@@ -53,10 +53,9 @@ export type SSROptions = {
 export async function ssr(options: SSROptions) {
   try {
     const stream = await serverRender(options)
-    return new Response(stream, {
-      headers: { 'Content-Type': 'text/html' },
-    })
+    return new Response(stream)
   } catch (error) {
+    console.warn('[ssr] Error:', error)
     const message = error instanceof Error ? error.message : 'Unknown error'
     return new Response(message, { status: 500 })
   }
@@ -75,15 +74,18 @@ export async function serverRender({
   module,
   props,
   buildConfig,
-  assetMap,
-  waitForStream = true,
+  waitForStream = false,
 }: SSROptions): Promise<ReactDOMServerReadableStream> {
-  const dir = getCurrentDirectory()
-  const source = await importSource(module, dir)
+  console.log('[serverRender] module:', module)
+
+  // const dir = getCurrentDirectory()
+  //console.log('[serverRender] dir:', dir)
+
+  // const source = await importSource(module, dir)
 
   // attempt to load the default export or the first named export
   // then create a React element with the given props.
-  const component = findFirstExport(source.exported)
+  const component = findFirstExport(module.exported)
   const element = React.createElement(component, props)
 
   if (!React.isValidElement(element)) {
@@ -92,14 +94,20 @@ export async function serverRender({
 
   // build the client-side JS code and render the element to a readable stream,
   // and serialize the initial props to a JSON string.
-  const clientJSCode = await buildClientJS(source.absolutePath, buildConfig)
-  const bootstrapScriptContent = makeBootstrapContent(props, assetMap)
+  const { bootstrapScripts, assetMap } = await buildClientJS(
+    source.absolutePath,
+    buildConfig
+  )
+
+  console.log('[serverRender] assetMap:', bootstrapScripts)
+
+  const bootstrapScriptContent = makeBootstrapContent({ ...props, assetMap })
 
   // render the jsx element to a readable stream and return the response, the
   // bootstrap script content is used to pass the initial props to the client,
   // and the bootstrap scripts are the client-side JS code to hydrate the app.
   const stream = await renderToReadableStream(element, {
-    bootstrapScripts: clientJSCode,
+    bootstrapScripts: bootstrapScripts,
     bootstrapScriptContent,
   })
 
@@ -129,7 +137,7 @@ async function buildClientJS(
     outdir = 'public',
     naming = { asset: '[file].[ext]' },
   }: Partial<BuildConfig> = {}
-): Promise<string[]> {
+): Promise<{ bootstrapScripts: string[]; assetMap: string[] }> {
   const dir = getCurrentDirectory()
   const resolvedPath = resolve(dir, absoluteFilePath)
   const templateString = template(`import App from '${resolvedPath}'`)
@@ -145,21 +153,31 @@ async function buildClientJS(
   })
 
   await unlink(tempName) // cleanup
-  console.log('[serverRender] buildOutput:', buildOutput)
-  return buildOutput.outputs
-    .filter((o) => o.path.endsWith('.js'))
-    .map((file) => {
-      // remove absolute file paths and return the public path
-      const filePath = file.path.split(`${outdir}/`)[1]
-      return [outdir, filePath].join('/')
-    })
+  console.log('[serverRender] buildOutput:', buildOutput.success)
+
+  if (!buildOutput.success) {
+    throw new Error('Failed to build client-side JS')
+  }
+
+  const sourceMaps = buildOutput.outputs.reduce(
+    (output, file) => {
+      if (file.path.endsWith('.js')) output.bootstrapScripts.push(file.path)
+      else output.assetMap.push(file.path)
+      return output
+    },
+    {
+      bootstrapScripts: [] as string[],
+      assetMap: [] as string[],
+    }
+  )
+
+  return sourceMaps
 }
 
-function makeBootstrapContent(
-  initialProps: any,
-  assetMap: Record<string, string> = {}
-) {
-  return `window.__INITIAL_PROPS__ = ${JSON.stringify(
-    initialProps
-  )}; window.__ASSET_MAP__ = ${JSON.stringify(assetMap)};`
+export type InitialProps<T extends {}> = T & {
+  assetMap: Record<string, string>
+}
+
+function makeBootstrapContent<T extends {}>(initialProps: InitialProps<T>) {
+  return `window.__INITIAL_PROPS__ = ${JSON.stringify(initialProps)};`
 }
